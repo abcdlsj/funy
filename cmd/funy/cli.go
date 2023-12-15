@@ -3,14 +3,15 @@ package main
 import (
 	"bytes"
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
 	"strings"
 
-	"github.com/abcdlsj/funy/internal/orchestrator"
-	"github.com/abcdlsj/funy/internal/tarball"
+	"github.com/abcdlsj/funy/pkgs/orchestrator"
+	"github.com/abcdlsj/funy/pkgs/tarball"
 	"github.com/charmbracelet/log"
 	"github.com/urfave/cli/v2"
 )
@@ -32,6 +33,12 @@ func main() {
 						Value:    "127.0.0.1:8080",
 						Required: true,
 					},
+					&cli.StringFlag{
+						Name:     "type",
+						Usage:    "app type",
+						Value:    "service",
+						Required: false,
+					},
 				},
 				Subcommands: []*cli.Command{
 					{
@@ -39,7 +46,7 @@ func main() {
 						Flags: []cli.Flag{
 							&cli.StringFlag{
 								Name:     "name",
-								Usage:    "app name",
+								Usage:    "service/function name",
 								Required: true,
 							},
 							&cli.StringSliceFlag{
@@ -48,18 +55,19 @@ func main() {
 							},
 							&cli.StringFlag{
 								Name:  "main_file",
-								Usage: "set main file",
+								Usage: "set go file",
 								Value: "main.go",
 							},
 						},
 						Usage: "create app",
 						Action: func(c *cli.Context) error {
 							serverAddr := c.String("server_address")
+							appType := c.String("type")
 							name := c.String("name")
 							mainFile := c.String("main_file")
 							ldFlagX := c.StringSlice("ld_flag_x")
 
-							return Create(serverAddr, name, mainFile, ldFlagX)
+							return Create(serverAddr, name, mainFile, appType, ldFlagX)
 						},
 					},
 					{
@@ -98,7 +106,16 @@ func main() {
 	}
 }
 
-func Create(svr, name, mainFile string, ldFlagX []string) error {
+func authheader() string {
+	user := os.Getenv("USERNAME")
+	password := os.Getenv("PASSWORD")
+
+	pair := fmt.Sprintf("%s:%s", user, password)
+
+	return fmt.Sprintf("Basic %s", base64.StdEncoding.EncodeToString([]byte(pair)))
+}
+
+func Create(svr, name, mainFile, appType string, ldFlagX []string) error {
 	ldFlagXMap := make(map[string]string)
 
 	for _, v := range ldFlagX {
@@ -106,9 +123,10 @@ func Create(svr, name, mainFile string, ldFlagX []string) error {
 		ldFlagXMap[kv[0]] = kv[1]
 	}
 
-	reqStru := orchestrator.CreateRequest{
+	reqStru := orchestrator.CreateReq{
 		MainFile: mainFile,
 		LDFlagX:  ldFlagXMap,
+		AppType:  appType,
 	}
 
 	body, err := json.Marshal(reqStru)
@@ -116,12 +134,13 @@ func Create(svr, name, mainFile string, ldFlagX []string) error {
 		return err
 	}
 
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/%s/create", svr, name), bytes.NewReader(body))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/orchestrator/%s/create", svr, name), bytes.NewReader(body))
 	if err != nil {
 		return err
 	}
 
 	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", authheader())
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
@@ -138,12 +157,13 @@ func Deploy(svr string, name string, dir string) error {
 		return err
 	}
 
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/%s/deploy", svr, name), tar)
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/orchestrator/%s/deploy", svr, name), tar)
 	if err != nil {
 		return err
 	}
 
 	req.Header.Set("Content-Type", "application/x-tar")
+	req.Header.Set("Authorization", authheader())
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {

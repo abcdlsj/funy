@@ -1,20 +1,4 @@
-package orchestrator
-
-import (
-	"os"
-
-	"github.com/charmbracelet/log"
-)
-
-const (
-	DynamicLibDir = "/tmp/funydynamic/"
-)
-
-func init() {
-	if err := os.MkdirAll(DynamicLibDir, 0755); err != nil {
-		log.Fatalf("create dynamic lib dir error: %v", err)
-	}
-}
+package share
 
 type ProcessState uint8
 
@@ -24,7 +8,6 @@ const (
 	Built
 	Loaded
 	Deployed
-
 	Error
 	Deleted
 )
@@ -48,9 +31,4 @@ func (p ProcessState) String() string {
 	}
 
 	return "UNKNOWN"
-}
-
-type CreateRequest struct {
-	MainFile string            `json:"main_file"`
-	LDFlagX  map[string]string `json:"ld_flag_x"`
 }

@@ -3,23 +3,23 @@ package dyloader
 import (
 	"plugin"
 
-	"github.com/abcdlsj/funy/internal/share/errs"
+	"github.com/abcdlsj/funy/pkgs/share/errs"
 	"github.com/charmbracelet/log"
 )
 
 type fn func() error
 
-const RunFnName = "Run"
-const ShutdownFnName = "Shutdown"
+const runFnName = "Run"
+const shutdownFnName = "Shutdown"
 
-func Load(dylib string) (run, shutdown fn, err error) {
+func LoadService(dylib string) (run, shutdown fn, err error) {
 	p, err := plugin.Open(dylib)
 	if err != nil {
 		log.Errorf("plugin open error: %v", err)
 		return
 	}
 
-	runSym, err := p.Lookup(RunFnName)
+	runSym, err := p.Lookup(runFnName)
 	if err != nil {
 		log.Errorf("plugin lookup error: %v", err)
 		return
@@ -32,7 +32,7 @@ func Load(dylib string) (run, shutdown fn, err error) {
 		return
 	}
 
-	shutdownSym, err := p.Lookup(RunFnName)
+	shutdownSym, err := p.Lookup(shutdownFnName)
 	if err != nil {
 		log.Errorf("plugin lookup error: %v", err)
 		return

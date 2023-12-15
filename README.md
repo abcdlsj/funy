@@ -1,6 +1,8 @@
 # Funy
 
 `Funy` is a `Golang` serverless framework using `Plugin`.
+Can deploy `Service` or `Function`.
+
 > Idea from [shuttle.rs](https://www.shuttle.rs/blog/2022/04/27/dev-log-1)
 
 > Currently, `Funy` dones not support `Apple Silicon`, I got a `issue` like <https://github.com/golang/go/issues/58826>.
@@ -14,10 +16,12 @@ make
 
 2. Start `funyd` service
 ```fish
-./bin/funyd
+USERNAME=<username> PASSWORD=<password> PORT=8080 ./bin/funyd
 ```
 
 3. Use `funy` cli to create and deploy a server
+
+> You need to set same `USERNAME` and `PASSWORD` in environment.
 ```fish
 funy (main)> ls
 README.md  cmd/  example/  go.mod  go.sum  internal/  makefile
@@ -33,4 +37,14 @@ funy (main)> curl localhost:8081
 {"message":"Hello World!"}⏎
 funy (main)> curl localhost:8081/ping
 {"ping count":"1"}⏎
+```
+
+4. You also can deploy a function by `funy`
+
+```fish
+funy (main)> ./bin/funy app --server_address=http://localhost:8080 --type=function create --name=hellohandler --main_file=handler.go
+funy (main)> ./bin/funy app --server_address=http://localhost:8080 --type=function deploy --name=hellohandler --dir=example/hellohandler
+# When deploy success, you can use `curl` to call it
+funy (main)> curl -u '<username>:<password>' localhost:8080/func/hellohandler
+Hello World!⏎
 ```

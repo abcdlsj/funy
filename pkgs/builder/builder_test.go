@@ -3,7 +3,7 @@ package builder_test
 import (
 	"testing"
 
-	"github.com/abcdlsj/funy/internal/builder"
+	"github.com/abcdlsj/funy/pkgs/builder"
 )
 
 func TestBuiler(t *testing.T) {

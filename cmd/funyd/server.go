@@ -1,6 +1,6 @@
 package main
 
-import "github.com/abcdlsj/funy/internal/orchestrator"
+import "github.com/abcdlsj/funy/pkgs/orchestrator"
 
 func main() {
 	orch := orchestrator.New()

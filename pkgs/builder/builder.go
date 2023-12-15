@@ -23,7 +23,7 @@ func (b *Builder) Build() error {
 		b.Output,
 	}
 
-	if b.LDFlagX != nil {
+	if len(b.LDFlagX) != 0 {
 		args = append(args, "-ldflags")
 
 		var ldflagx string
