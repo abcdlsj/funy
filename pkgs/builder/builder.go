@@ -28,7 +28,11 @@ func (b *Builder) Build() error {
 
 		var ldflagx string
 		for k, v := range b.LDFlagX {
-			ldflagx += fmt.Sprintf("-X %s=%s", k, v)
+			ldflagx += fmt.Sprintf("-X %s=%s ", k, v)
+		}
+
+		if len(ldflagx) != 0 {
+			ldflagx = ldflagx[:len(ldflagx)-1]
 		}
 
 		args = append(args, ldflagx)

@@ -48,3 +48,25 @@ funy (main)> ./bin/funy app --server_address=http://localhost:8080 --type=functi
 funy (main)> curl -u '<username>:<password>' localhost:8080/func/hellohandler
 Hello World!⏎
 ```
+
+## More
+**Can use `ld_flag_x` do many of things.**
+
+I have a slightly more complex function, [example/leetjump](/example/leetjump/)
+
+Implemented so that when you call `http://xxxx/xxx/:question_id` to jump to the issue page.
+It uses `Cloudflare` `R2` to store the file containing the information underlying the `Leetcode` issue.
+
+I declared some variables in `main.go`. You can set this using `ld_flag_x`.
+```go
+var (
+	BUCKET          string
+	ACCOUNTID       string
+	ACCESSKEYID     string
+	ACCESSKEYSECRET string
+
+	LOGPREFIX string
+)
+```
+
+> `LOGPREFIX` is a prefix for logs that may be used in the future.

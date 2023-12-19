@@ -133,7 +133,7 @@ func (s *Orchestrator) Serve() {
 		c.JSON(200, routes)
 	})
 
-	fng.GET("/:function", func(c *gin.Context) {
+	fng.GET("/:function/*action", func(c *gin.Context) {
 		fnName := c.Param("function")
 		fn, ok := s.fnRoutes.Load(fnName)
 		if !ok {
@@ -144,16 +144,16 @@ func (s *Orchestrator) Serve() {
 		gin.WrapF(fn.(func(http.ResponseWriter, *http.Request)))(c)
 	})
 
-	fng.POST("/:function", func(c *gin.Context) {
-		fnName := c.Param("function")
-		fn, ok := s.fnRoutes.Load(fnName)
-		if !ok {
-			c.String(404, "function not found")
-			return
-		}
+	// fng.POST("/:function/*action", func(c *gin.Context) {
+	// 	fnName := c.Param("function")
+	// 	fn, ok := s.fnRoutes.Load(fnName)
+	// 	if !ok {
+	// 		c.String(404, "function not found")
+	// 		return
+	// 	}
 
-		fn.(func(http.ResponseWriter, *http.Request))(c.Writer, c.Request)
-	})
+	// 	fn.(func(http.ResponseWriter, *http.Request))(c.Writer, c.Request)
+	// })
 
 	r.Run(":" + os.Getenv("PORT"))
 }
